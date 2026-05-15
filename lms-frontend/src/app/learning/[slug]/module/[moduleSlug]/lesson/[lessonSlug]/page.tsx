@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import LearningContainer from "@/components/learning/learning-container";
 import LessonTracker from "@/components/learning/lesson-tracker";
 import { ApiResponse, Lesson, Module } from "@/types";
+import { API_URL } from "@/lib/constants";
 
 interface Props {
   params: Promise<{
@@ -17,7 +18,7 @@ function authHeaders(token: string): HeadersInit {
 }
 
 async function getModule(moduleSlug: string, token: string): Promise<Module> {
-  const res = await fetch(`http://localhost:3001/modules/${moduleSlug}`, {
+  const res = await fetch(`${API_URL}/modules/${moduleSlug}`, {
     cache: "no-store",
     headers: authHeaders(token),
   });
@@ -31,7 +32,7 @@ async function getModule(moduleSlug: string, token: string): Promise<Module> {
 }
 
 async function getLesson(lessonSlug: string, token: string): Promise<Lesson | undefined> {
-  const res = await fetch(`http://localhost:3001/lessons/${lessonSlug}`, {
+  const res = await fetch(`${API_URL}/lessons/${lessonSlug}`, {
     cache: "no-store",
     headers: authHeaders(token),
   });

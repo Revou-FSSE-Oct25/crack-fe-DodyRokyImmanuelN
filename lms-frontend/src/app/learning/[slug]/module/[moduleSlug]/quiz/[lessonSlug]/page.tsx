@@ -1,8 +1,9 @@
 import { cookies } from "next/headers";
 import QuizContainer from "@/components/learning/quiz/quiz-container";
+import { API_URL } from "@/lib/constants";
 
 async function getLesson(lessonSlug: string, token: string) {
-  const res = await fetch(`http://localhost:3001/lessons/${lessonSlug}`, {
+  const res = await fetch(`${API_URL}/lessons/${lessonSlug}`, {
     cache: "no-store",
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -12,7 +13,7 @@ async function getLesson(lessonSlug: string, token: string) {
 }
 
 async function getQuiz(lessonId: string, token: string) {
-  const res = await fetch(`http://localhost:3001/quizzes/lesson/${lessonId}`, {
+  const res = await fetch(`${API_URL}/quizzes/lesson/${lessonId}`, {
     cache: "no-store",
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -23,7 +24,7 @@ async function getQuiz(lessonId: string, token: string) {
 
 async function getLastAttempt(quizId: string, token: string) {
   const res = await fetch(
-    `http://localhost:3001/quizzes/${quizId}/last-attempt`,
+    `${API_URL}/quizzes/${quizId}/last-attempt`,
     {
       cache: "no-store",
       headers: { Authorization: `Bearer ${token}` },

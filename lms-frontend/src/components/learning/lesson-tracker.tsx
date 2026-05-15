@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { API_URL } from "@/lib/constants";
 
 interface Props {
   lessonId: string;
@@ -12,7 +13,7 @@ export default function LessonTracker({ lessonId, token }: Props) {
   useEffect(() => {
     const controller = new AbortController();
 
-    fetch("http://localhost:3001/progress/access", {
+    fetch(`${API_URL}/progress/access`, {
       method: "POST",
       signal: controller.signal,
       headers: {

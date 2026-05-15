@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Lesson } from "@/types";
+import { API_URL } from "@/lib/constants";
 
 type AnswerMap = {
   [questionId: string]: string;
@@ -111,7 +112,7 @@ export default function QuizContainer({
       };
 
       const res = await fetch(
-        `http://localhost:3001/quizzes/${quiz.id}/submit`,
+        `${API_URL}/quizzes/${quiz.id}/submit`,
         {
           method: "POST",
           headers: {

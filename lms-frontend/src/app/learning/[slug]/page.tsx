@@ -1,16 +1,22 @@
 import { ApiResponse, LearningPath } from "@/types";
+import { API_URL } from "@/lib/constants";
 import Link from "next/link";
 import { BookOpen, ChevronRight, PlayCircle, LayoutList, Clock } from "lucide-react";
 
 async function getLearningPath(slug: string): Promise<LearningPath | null> {
-  const res = await fetch(`http://localhost:3001/learning-paths/${slug}`, {
-    cache: "no-store",
-  });
+  try {
+    const res = await fetch(`${API_URL}/learning-paths/${slug}`, {
+      cache: "no-store",
+    });
 
-  if (!res.ok) return null;
+    if (!res.ok) return null;
 
-  const result: ApiResponse<LearningPath> = await res.json();
-  return result.data;
+    const result: ApiResponse<LearningPath> = await res.json();
+    return result.data;
+  } catch (error) {
+    console.error("Gagal mengambil learning path:", error);
+    return null;
+  }
 }
 
 interface Props {

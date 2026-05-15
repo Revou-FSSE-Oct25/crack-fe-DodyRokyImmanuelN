@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LearningChatbot } from "@/components/learning-chatbot/LearningChatbot";
 import { useState } from "react";
+import { API_URL } from "@/lib/constants";
 
 type LearningPathContext = Pick<LearningPath, "id" | "title" | "slug">;
 
@@ -58,7 +59,7 @@ export default function LessonContent({
 
     setIsCompleting(true);
     try {
-      const res = await fetch(`http://localhost:3001/progress/${lesson.id}/complete`, {
+      const res = await fetch(`${API_URL}/progress/${lesson.id}/complete`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

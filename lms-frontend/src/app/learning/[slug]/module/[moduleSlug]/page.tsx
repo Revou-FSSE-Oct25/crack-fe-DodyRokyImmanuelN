@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { ApiResponse, Module } from "@/types";
+import { API_URL } from "@/lib/constants";
 
 interface Props {
   params: Promise<{
@@ -10,7 +11,7 @@ interface Props {
 }
 
 async function getModule(moduleSlug: string, token: string): Promise<Module> {
-  const res = await fetch(`http://localhost:3001/modules/${moduleSlug}`, {
+  const res = await fetch(`${API_URL}/modules/${moduleSlug}`, {
     cache: "no-store",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -22,7 +23,7 @@ async function getModule(moduleSlug: string, token: string): Promise<Module> {
 
 async function getModuleProgress(moduleId: string, token: string) {
   const res = await fetch(
-    `http://localhost:3001/progress/module/${moduleId}`,
+    `${API_URL}/progress/module/${moduleId}`,
     {
       cache: "no-store",
       headers: {
