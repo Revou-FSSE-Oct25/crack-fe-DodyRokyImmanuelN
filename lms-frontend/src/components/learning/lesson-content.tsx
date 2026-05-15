@@ -5,13 +5,18 @@ import { LearningPath, Module, Lesson } from "@/types";
 import LessonNavigation from "./lesson-navigation";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { LearningChatbot } from "@/components/learning-chatbot/LearningChatbot";
+import { useState } from "react";
+
+type LearningPathContext = Pick<LearningPath, "id" | "title" | "slug">;
 
 interface Props {
   lesson: Lesson;
   module: Module;
-  learningPath: LearningPath; 
+  learningPath: LearningPathContext; 
   slug: string;
   moduleSlug: string;
+  token: string;
 }
 
 function getYoutubeEmbedUrl(url: string) {
@@ -41,35 +46,42 @@ export default function LessonContent({
   learningPath, 
   slug,
   moduleSlug,
+  token,
 }: Props) {
   const router = useRouter();
+  const [isCompleting, setIsCompleting] = useState(false);
   const videoUrl = lesson.readingContent?.videoUrl;
   const embedUrl = videoUrl ? getYoutubeEmbedUrl(videoUrl) : null;
 
-  // Handler untuk menyelesaikan modul
-  const handleCompleteModule = async () => {
+  const handleCompleteLesson = async () => {
+    if (lesson.type !== "READING") return;
+
+    setIsCompleting(true);
     try {
       const res = await fetch(`http://localhost:3001/progress/${lesson.id}/complete`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          // Jika butuh Authorization, ambil token di sini
+          Authorization: `Bearer ${token}`,
         },
       });
 
       const result = await res.json();
 
       if (res.ok) {
-        // Jika modul selesai
         if (result.data?.moduleCompleted) {
           alert("Selamat! Modul Selesai.");
           router.push(`/learning/${slug}`); 
         } else {
-          router.refresh(); // Update status centang di sidebar
+          router.refresh();
         }
+      } else {
+        alert(result.message ?? "Gagal menandai lesson selesai.");
       }
     } catch (error) {
-      console.error("Gagal memproses selesaikan modul:", error);
+      console.error("Gagal menandai lesson selesai:", error);
+    } finally {
+      setIsCompleting(false);
     }
   };
 
@@ -99,6 +111,20 @@ export default function LessonContent({
             <ReactMarkdown>
               {lesson.readingContent?.content ?? ""}
             </ReactMarkdown>
+          </div>
+
+          <div className="mt-8 rounded-lg border bg-muted/30 p-4">
+            <p className="mb-3 text-sm text-muted-foreground">
+              Setelah selesai membaca materi ini, tandai lesson sebagai selesai agar progres modulmu naik.
+            </p>
+            <button
+              type="button"
+              onClick={handleCompleteLesson}
+              disabled={isCompleting}
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+            >
+              {isCompleting ? "Menyimpan..." : "Tandai Lesson Selesai"}
+            </button>
           </div>
         </div>
       )}
@@ -131,8 +157,16 @@ export default function LessonContent({
         currentLessonSlug={lesson.slug}
         slug={slug}
         moduleSlug={moduleSlug}
-        onCompleteModule={handleCompleteModule}
       />
+
+      {lesson.type === "READING" && (
+        <LearningChatbot
+          scope="LESSON"
+          lessonId={lesson.id}
+          title={lesson.title}
+          progressSummary={`${learningPath.title} - ${module.title}`}
+        />
+      )}
     </div>
   );
 }

@@ -2,8 +2,10 @@ import Link from "next/link";
 import { LearningPath, Module } from "@/types";
 import { PlayCircle, FileQuestion, BookOpen, ChevronLeft } from "lucide-react";
 
+type LearningPathContext = Pick<LearningPath, "id" | "title" | "slug">;
+
 interface Props {
-  learningPath: LearningPath;
+  learningPath: LearningPathContext;
   module: Module;
   activeLessonSlug?: string;
   slug: string;

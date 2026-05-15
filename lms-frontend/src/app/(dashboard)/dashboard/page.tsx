@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/authStore';
 import API from '@/lib/api';
 import { ENDPOINTS, QUERY_KEYS } from '@/lib/constants';
 import type { Enrollment } from '@/types';
+import { LearningChatbot } from '@/components/learning-chatbot/LearningChatbot';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -44,6 +45,7 @@ export default function DashboardPage() {
   const totalCourses = enrollments.length;
   const completedCourses = enrollments.filter((e) => e.status === 'COMPLETED').length;
   const inProgressCourses = enrollments.filter((e) => e.status === 'ACTIVE').length;
+  const progressSummary = `${totalCourses} kursus, ${inProgressCourses} berjalan, ${completedCourses} selesai`;
 
   return (
     <div className="space-y-6">
@@ -246,6 +248,14 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+      )}
+
+      {user?.role !== 'ADMIN' && (
+        <LearningChatbot
+          scope="GENERAL"
+          title="Dashboard"
+          progressSummary={progressSummary}
+        />
       )}
     </div>
   );

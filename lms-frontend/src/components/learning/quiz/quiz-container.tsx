@@ -1,10 +1,52 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import type { Lesson } from "@/types";
 
 type AnswerMap = {
   [questionId: string]: string;
+};
+
+type QuizOption = {
+  id: string;
+  text: string;
+};
+
+type QuizQuestion = {
+  id: string;
+  text: string;
+  options: QuizOption[];
+};
+
+type QuizData = {
+  id: string;
+  timeLimit: number;
+  passingScore: number;
+  questions: QuizQuestion[];
+};
+
+type LastAttempt = {
+  score: number;
+  isPassed: boolean;
+  attemptNumber: number;
+  submittedAt: string;
+} | null;
+
+type QuizResult = {
+  score: number;
+  isPassed: boolean;
+  passingScore: number;
+  attemptNumber: number;
+};
+
+type QuizContainerProps = {
+  quiz: QuizData;
+  lesson: Lesson;
+  token: string;
+  slug: string;
+  moduleSlug: string;
+  lastAttempt: LastAttempt;
 };
 
 export default function QuizContainer({
@@ -14,36 +56,20 @@ export default function QuizContainer({
   slug,
   moduleSlug,
   lastAttempt,
-}: any) {
+}: QuizContainerProps) {
   const router = useRouter();
 
   const [started, setStarted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<AnswerMap>({});
-  const [timeLeft, setTimeLeft] = useState(quiz.timeLimit * 60);
+  const [timeLeft, setTimeLeft] = useState(quiz.timeLimit);
   const [submitted, setSubmitted] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<QuizResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const submittedRef = useRef(false);
   const currentQuestion = quiz.questions[currentIndex];
-
-  useEffect(() => {
-    if (!started || submitted) return;
-
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          if (!submittedRef.current) handleSubmit();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [started, submitted]);
 
   const formatTime = (sec: number) => {
     const m = Math.floor(sec / 60);
@@ -70,7 +96,7 @@ export default function QuizContainer({
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (submittedRef.current) return;
     submittedRef.current = true;
     setIsSubmitting(true);
@@ -98,18 +124,38 @@ export default function QuizContainer({
 
       if (!res.ok) throw new Error(`Server bermasalah: ${res.status}`);
 
-      const data = await res.json();
+      const data = (await res.json()) as { data?: QuizResult };
       if (!data?.data) throw new Error("Response tidak valid dari server");
 
       setResult(data.data);
       setSubmitted(true);
-    } catch (err: any) {
-      setError(err.message ?? "Terjadi kesalahan saat submit quiz");
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Terjadi kesalahan saat submit quiz",
+      );
       submittedRef.current = false;
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [answers, quiz.id, token]);
+
+  useEffect(() => {
+    if (!started || submitted) return;
+
+    const interval = setInterval(() => {
+      setTimeLeft((previous: number) => {
+        if (previous <= 1) {
+          if (!submittedRef.current) void handleSubmit();
+          return 0;
+        }
+        return previous - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [handleSubmit, started, submitted]);
 
   // ── PRE-QUIZ SCREEN ──────────────────────────────────────────
   if (!started) {
@@ -117,7 +163,7 @@ export default function QuizContainer({
       <div className="max-w-2xl mx-auto p-10">
         <h1 className="text-2xl font-bold mb-1">{lesson.title}</h1>
         <p className="text-muted-foreground mb-8">
-          {quiz.questions.length} soal - {quiz.timeLimit} menit - Nilai lulus {quiz.passingScore}
+          {quiz.questions.length} soal - {formatTime(quiz.timeLimit)} - Nilai lulus {quiz.passingScore}
         </p>
 
         {lastAttempt ? (
@@ -226,7 +272,7 @@ export default function QuizContainer({
               setResult(null);
               setAnswers({});
               setCurrentIndex(0);
-              setTimeLeft(quiz.timeLimit * 60);
+              setTimeLeft(quiz.timeLimit);
               setStarted(false);
             }}
             className="flex-1 px-4 py-2 border rounded hover:bg-muted transition"
@@ -293,7 +339,7 @@ export default function QuizContainer({
       <div className="border rounded-lg p-5 space-y-4">
         <h2 className="text-lg font-semibold">{currentQuestion.text}</h2>
         <div className="space-y-2">
-          {currentQuestion.options.map((opt: any) => (
+          {currentQuestion.options.map((opt) => (
             <label
               key={opt.id}
               className={`flex items-center gap-3 p-3 border rounded cursor-pointer transition

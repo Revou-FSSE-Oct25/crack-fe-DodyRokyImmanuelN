@@ -3,22 +3,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Loader2, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import API from '@/lib/api';
 import { LearningPathDetailsCard } from '@/components/admin/edit-course/LearningPathDetailsCard';
 import { LessonDialog } from '@/components/admin/edit-course/LessonDialog';
 import { ModuleDialog } from '@/components/admin/edit-course/ModuleDialog';
 import { ModulesLessonsCard } from '@/components/admin/edit-course/ModulesLessonsCard';
+import { QuizDialog } from '@/components/admin/edit-course/QuizDialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,10 +23,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import {
   emptyLessonForm,
   emptyModuleForm,
@@ -666,8 +656,8 @@ export default function EditCoursePage() {
       return false;
     }
 
-    if (Number(quizDialog.form.timeLimit) < 60) {
-      toast.error('Durasi quiz minimal 60 detik');
+    if (Number(quizDialog.form.timeLimit) < 1) {
+      toast.error('Durasi quiz minimal 1 menit');
       return false;
     }
 
@@ -713,7 +703,7 @@ export default function EditCoursePage() {
     try {
       const payload = {
         lessonId: quizDialog.lessonId,
-        timeLimit: Number(quizDialog.form.timeLimit) || 60,
+        timeLimit: (Number(quizDialog.form.timeLimit) || 1) * 60,
         passingScore: Number(quizDialog.form.passingScore) || 70,
         isFinalExam: quizDialog.form.isFinalExam,
         questions: quizDialog.form.questions.map((question, index) => ({
@@ -862,228 +852,20 @@ export default function EditCoursePage() {
         onSave={handleSaveLesson}
       />
 
-      <Dialog
-        open={quizDialog.open}
-        onOpenChange={(open) =>
-          !isSavingQuiz && setQuizDialog((previous) => ({ ...previous, open }))
-        }
-      >
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Kelola Quiz</DialogTitle>
-          </DialogHeader>
-
-          {quizDialog.isLoading ? (
-            <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Memuat quiz...
-            </div>
-          ) : (
-            <div className="space-y-5">
-              <div className="rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
-                {quizDialog.lessonTitle}
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="quiz-time-limit">Durasi (detik)</Label>
-                  <Input
-                    id="quiz-time-limit"
-                    type="number"
-                    min="60"
-                    value={quizDialog.form.timeLimit}
-                    onChange={(event) =>
-                      setQuizDialog((previous) => ({
-                        ...previous,
-                        form: { ...previous.form, timeLimit: event.target.value },
-                      }))
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="quiz-passing-score">Nilai Lulus</Label>
-                  <Input
-                    id="quiz-passing-score"
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={quizDialog.form.passingScore}
-                    onChange={(event) =>
-                      setQuizDialog((previous) => ({
-                        ...previous,
-                        form: { ...previous.form, passingScore: event.target.value },
-                      }))
-                    }
-                  />
-                </div>
-                <div className="flex items-center gap-3 rounded-md border px-3 py-2">
-                  <Switch
-                    checked={quizDialog.form.isFinalExam}
-                    onCheckedChange={(checked) =>
-                      setQuizDialog((previous) => ({
-                        ...previous,
-                        form: { ...previous.form, isFinalExam: checked },
-                      }))
-                    }
-                  />
-                  <div>
-                    <p className="text-sm font-medium">Final Exam</p>
-                    <p className="text-xs text-muted-foreground">Sekali percobaan</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">Pertanyaan</h3>
-                  <Button type="button" variant="outline" size="sm" onClick={addQuizQuestion}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Tambah Pertanyaan
-                  </Button>
-                </div>
-
-                {quizDialog.form.questions.map((question, questionIndex) => (
-                  <div key={question.id} className="space-y-4 rounded-md border p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <Badge variant="secondary">Pertanyaan {questionIndex + 1}</Badge>
-                      {quizDialog.form.questions.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => removeQuizQuestion(question.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Pertanyaan</Label>
-                      <Textarea
-                        rows={3}
-                        value={question.text}
-                        onChange={(event) =>
-                          updateQuizQuestion(question.id, 'text', event.target.value)
-                        }
-                        placeholder="Tulis pertanyaan quiz..."
-                      />
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label>Poin</Label>
-                        <Input
-                          type="number"
-                          min="1"
-                          value={question.points}
-                          onChange={(event) =>
-                            updateQuizQuestion(question.id, 'points', event.target.value)
-                          }
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Urutan</Label>
-                        <Input
-                          type="number"
-                          min="1"
-                          value={question.order}
-                          onChange={(event) =>
-                            updateQuizQuestion(question.id, 'order', event.target.value)
-                          }
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Label>Opsi Jawaban</Label>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => addQuizOption(question.id)}
-                        >
-                          <Plus className="mr-2 h-4 w-4" />
-                          Tambah Opsi
-                        </Button>
-                      </div>
-
-                      {question.options.map((option, optionIndex) => (
-                        <div key={option.id} className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            name={`correct-${question.id}`}
-                            checked={option.isCorrect}
-                            onChange={() =>
-                              updateQuizOption(question.id, option.id, 'isCorrect', true)
-                            }
-                            className="h-4 w-4"
-                            aria-label={`Jawaban benar opsi ${optionIndex + 1}`}
-                          />
-                          <Input
-                            value={option.text}
-                            onChange={(event) =>
-                              updateQuizOption(question.id, option.id, 'text', event.target.value)
-                            }
-                            placeholder={`Opsi ${optionIndex + 1}`}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive"
-                            disabled={question.options.length <= 2}
-                            onClick={() => removeQuizOption(question.id, option.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="gap-2 sm:justify-between">
-            <div>
-              {quizDialog.quizId && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="text-destructive hover:text-destructive"
-                  disabled={isSavingQuiz || quizDialog.isLoading}
-                  onClick={() =>
-                    setDeleteQuizDialog({
-                      quizId: quizDialog.quizId as string,
-                      lessonTitle: quizDialog.lessonTitle ?? 'Quiz',
-                    })
-                  }
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Hapus Quiz
-                </Button>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setQuizDialog((previous) => ({ ...previous, open: false }))}
-                disabled={isSavingQuiz}
-              >
-                Batal
-              </Button>
-              <Button onClick={handleSaveQuiz} disabled={isSavingQuiz || quizDialog.isLoading}>
-                {isSavingQuiz && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Simpan Quiz
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <QuizDialog
+        dialog={quizDialog}
+        isSaving={isSavingQuiz}
+        onOpenChange={(open) => setQuizDialog((previous) => ({ ...previous, open }))}
+        onFormChange={(form) => setQuizDialog((previous) => ({ ...previous, form }))}
+        onAddQuestion={addQuizQuestion}
+        onRemoveQuestion={removeQuizQuestion}
+        onUpdateQuestion={updateQuizQuestion}
+        onAddOption={addQuizOption}
+        onRemoveOption={removeQuizOption}
+        onUpdateOption={updateQuizOption}
+        onDeleteQuiz={(quizId, lessonTitle) => setDeleteQuizDialog({ quizId, lessonTitle })}
+        onSave={handleSaveQuiz}
+      />
 
       <AlertDialog
         open={deleteModuleDialog !== null}

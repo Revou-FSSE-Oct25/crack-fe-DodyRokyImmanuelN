@@ -3,7 +3,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useUiStore } from '@/store/uiStore';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +38,7 @@ export function DashboardNavbar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2 px-2">
               <Avatar className="h-8 w-8">
+                {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
                 <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                   {user.name.charAt(0).toUpperCase()}
                 </AvatarFallback>

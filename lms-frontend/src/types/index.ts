@@ -66,6 +66,7 @@ export interface Module {
   createdAt: string;
   updatedAt: string;
   lessons: Lesson[];
+  learningPath?: Pick<LearningPath, 'id' | 'title' | 'slug'>;
   _count?: { lessons: number };
 }
 
@@ -100,7 +101,7 @@ export interface ReadingContent {
 export interface Quiz {
   id: string;
   lessonId: string;
-  timeLimit: number;       // dalam menit
+  timeLimit: number;       // dalam detik
   passingScore: number;    // nilai minimum lulus (misal 70)
   isFinalExam: boolean;
   questions: Question[];
@@ -313,15 +314,17 @@ export interface RegisterResponse {
 // ============================================================
 
 export interface AiChatPayload {
-  message: string;
-  lessonId: string;
+  scope: 'GENERAL' | 'LESSON';
+  lessonId?: string;
+  messages: {
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+  }[];
+  progressSummary?: string;
 }
 
 export interface AiChatResponse {
-  reply: string;
-  context: {
-    lesson: string;
-    module: string;
-    progressSummary: string;
-  };
+  message: string;
+  model: string;
+  tokenUsed?: number;
 }

@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import LearningContainer from "@/components/learning/learning-container";
 import LessonTracker from "@/components/learning/lesson-tracker";
-import { ApiResponse, LearningPath, Lesson, Module } from "@/types";
+import { ApiResponse, Lesson, Module } from "@/types";
 
 interface Props {
   params: Promise<{
@@ -14,20 +14,6 @@ interface Props {
 
 function authHeaders(token: string): HeadersInit {
   return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
-async function getLearningPath(slug: string, token: string): Promise<LearningPath> {
-  const res = await fetch(`http://localhost:3001/learning-paths/${slug}`, {
-    cache: "no-store",
-    headers: authHeaders(token),
-  });
-
-  if (!res.ok) {
-    throw new Error(`Gagal mengambil learning path: ${res.status}`);
-  }
-
-  const result: ApiResponse<LearningPath> = await res.json();
-  return result.data;
 }
 
 async function getModule(moduleSlug: string, token: string): Promise<Module> {
@@ -69,15 +55,17 @@ export default async function LessonPage({ params }: Props) {
     redirect("/login");
   }
 
-  const [learningPath, moduleDetail] = await Promise.all([
-    getLearningPath(slug, token),
+  const [moduleDetail, lesson] = await Promise.all([
     getModule(moduleSlug, token),
+    getLesson(lessonSlug, token),
   ]);
-
-  const lesson = await getLesson(lessonSlug, token);
 
   if (!lesson) {
     return <div>Gagal memuat lesson. Silakan login ulang.</div>;
+  }
+
+  if (!moduleDetail.learningPath) {
+    return <div>Gagal memuat data kursus. Silakan coba lagi.</div>;
   }
 
   return (
@@ -85,12 +73,13 @@ export default async function LessonPage({ params }: Props) {
       {/* Track lesson yang sedang dibuka, fire and forget */}
       <LessonTracker lessonId={lesson.id} token={token} />
       <LearningContainer
-        learningPath={learningPath}
+        learningPath={moduleDetail.learningPath}
         module={moduleDetail}
         lesson={lesson}
         slug={slug}
         moduleSlug={moduleSlug}
         activeLessonSlug={lessonSlug}
+        token={token}
       />
     </>
   );

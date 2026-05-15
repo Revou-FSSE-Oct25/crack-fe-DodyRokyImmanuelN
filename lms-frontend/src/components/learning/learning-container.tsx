@@ -3,13 +3,16 @@ import { LearningPath, Module, Lesson } from "@/types";
 import LearningSidebar from "./learning-sidebar";
 import LessonContent from "./lesson-content";
 
+type LearningPathContext = Pick<LearningPath, "id" | "title" | "slug">;
+
 interface Props {
-  learningPath: LearningPath;
+  learningPath: LearningPathContext;
   module: Module;
   lesson: Lesson;
   slug: string;
   moduleSlug: string;
   activeLessonSlug: string; 
+  token: string;
 }
 
 export default function LearningContainer({
@@ -19,6 +22,7 @@ export default function LearningContainer({
   slug,
   moduleSlug,
   activeLessonSlug,
+  token,
 }: Props) {
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -38,6 +42,7 @@ export default function LearningContainer({
           learningPath={learningPath} 
           slug={slug}
           moduleSlug={moduleSlug}
+          token={token}
         />
       </main>
     </div>

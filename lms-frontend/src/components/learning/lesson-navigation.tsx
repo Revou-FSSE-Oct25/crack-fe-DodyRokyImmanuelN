@@ -62,7 +62,7 @@ export default function LessonNavigation({
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 group-hover:text-foreground transition-colors" />
         </Link>
-      ) : (
+      ) : onCompleteModule ? (
         <button
           onClick={handleComplete}
           disabled={isLoading}
@@ -71,6 +71,14 @@ export default function LessonNavigation({
           {isLoading ? "Memproses..." : "Selesaikan Modul"}
           <CheckCircle className="h-4 w-4" />
         </button>
+      ) : (
+        <Link
+          href={`/learning/${slug}`}
+          className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all ml-auto font-semibold shadow-sm"
+        >
+          Kembali ke Kursus
+          <CheckCircle className="h-4 w-4" />
+        </Link>
       )}
     </div>
   );

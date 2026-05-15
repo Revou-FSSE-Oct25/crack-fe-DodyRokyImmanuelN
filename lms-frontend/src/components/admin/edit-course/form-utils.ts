@@ -39,14 +39,14 @@ export const emptyQuizQuestion = (order: number): QuizQuestionForm => ({
 });
 
 export const emptyQuizForm = (): QuizForm => ({
-  timeLimit: '300',
+  timeLimit: '5',
   passingScore: '70',
   isFinalExam: false,
   questions: [emptyQuizQuestion(1)],
 });
 
 export const quizToForm = (quiz: Quiz): QuizForm => ({
-  timeLimit: String(quiz.timeLimit),
+  timeLimit: String(Math.max(1, Math.round(quiz.timeLimit / 60))),
   passingScore: String(quiz.passingScore),
   isFinalExam: quiz.isFinalExam,
   questions: quiz.questions.map((question) => ({
