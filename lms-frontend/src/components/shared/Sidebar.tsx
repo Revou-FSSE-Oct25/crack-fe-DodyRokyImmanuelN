@@ -85,7 +85,11 @@ export function Sidebar() {
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-6 border-b">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-            <BookOpen className="h-5 w-5 text-primary" />
+            <img
+              src="/favicon.ico"
+              alt={`${APP_NAME} logo`}
+              className="h-5 w-5 rounded-sm"
+            />
             <span>{APP_NAME}</span>
           </Link>
           <button

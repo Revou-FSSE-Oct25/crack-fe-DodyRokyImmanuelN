@@ -134,7 +134,7 @@ export default async function HomePage() {
       {/* Footer */}
       <footer className="border-t py-8 bg-muted/30">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2026 {APP_NAME}. Seluruh hak cipta dilindungi.</p>
+          <p>&copy; 2026 {APP_NAME}. Seluruh hak cipta dilindungi.</p>
         </div>
       </footer>
     </div>

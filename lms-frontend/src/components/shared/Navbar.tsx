@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { APP_NAME } from '@/lib/constants';
-import { BookOpen, LogOut, LayoutDashboard } from 'lucide-react';
+import { LogOut, LayoutDashboard } from 'lucide-react';
 import { useSyncExternalStore } from 'react';
 import {
   DropdownMenu,
@@ -28,7 +28,11 @@ export function Navbar() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-          <BookOpen className="h-6 w-6 text-primary" />
+          <img
+            src="/favicon.ico"
+            alt={`${APP_NAME} logo`}
+            className="h-6 w-6 rounded-sm"
+          />
           <span>{APP_NAME}</span>
         </Link>
 
@@ -41,7 +45,7 @@ export function Navbar() {
             Kursus
           </Link>
           <Link
-            href="/#about"
+            href="/about"
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
             Tentang
