@@ -2,12 +2,12 @@
 // ENUMS — mirror Prisma schema
 // ============================================================
 
-export type Role = 'ADMIN' | 'USER';
-export type LessonType = 'READING' | 'QUIZ';
-export type EnrollmentStatus = 'ACTIVE' | 'COMPLETED';
-export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED';
-export type ProgressStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
-export type CertificateType = 'MODULE' | 'LEARNING_PATH';
+export type Role = "ADMIN" | "USER";
+export type LessonType = "READING" | "QUIZ";
+export type EnrollmentStatus = "ACTIVE" | "COMPLETED";
+export type PaymentStatus = "PENDING" | "PAID" | "FAILED";
+export type ProgressStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
+export type CertificateType = "MODULE" | "LEARNING_PATH";
 
 // ============================================================
 // USER
@@ -66,7 +66,7 @@ export interface Module {
   createdAt: string;
   updatedAt: string;
   lessons: Lesson[];
-  learningPath?: Pick<LearningPath, 'id' | 'title' | 'slug'>;
+  learningPath?: Pick<LearningPath, "id" | "title" | "slug">;
   _count?: { lessons: number };
 }
 
@@ -101,8 +101,8 @@ export interface ReadingContent {
 export interface Quiz {
   id: string;
   lessonId: string;
-  timeLimit: number;       // dalam detik
-  passingScore: number;    // nilai minimum lulus (misal 70)
+  timeLimit: number; // dalam detik
+  passingScore: number; // nilai minimum lulus (misal 70)
   isFinalExam: boolean;
   questions: Question[];
 }
@@ -181,7 +181,7 @@ export interface Progress {
   userId: string;
   lessonId: string;
   status: ProgressStatus;
-  score: number | null;      // ada di schema
+  score: number | null; // ada di schema
   completedAt: string | null;
   lesson?: Lesson;
 }
@@ -195,6 +195,7 @@ export interface ModuleProgress {
     id: string;
     moduleId: string;
     title: string;
+    slug: string;
     type: LessonType;
     order: number;
     createdAt: string;
@@ -216,7 +217,7 @@ export interface Payment {
   amount: number;
   status: PaymentStatus;
   xenditInvoiceId: string | null;
-  xenditPaymentUrl: string | null;  // URL redirect ke halaman bayar Xendit
+  xenditPaymentUrl: string | null; // URL redirect ke halaman bayar Xendit
   paidAt: string | null;
   expiredAt: string | null;
   createdAt: string;
@@ -308,16 +309,15 @@ export interface RegisterResponse {
   data: User;
 }
 
-
 // ============================================================
 // AI
 // ============================================================
 
 export interface AiChatPayload {
-  scope: 'GENERAL' | 'LESSON';
+  scope: "GENERAL" | "LESSON";
   lessonId?: string;
   messages: {
-    role: 'user' | 'assistant' | 'system';
+    role: "user" | "assistant" | "system";
     content: string;
   }[];
   progressSummary?: string;

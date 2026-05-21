@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import LearningContainer from "@/components/learning/learning-container";
 import LessonTracker from "@/components/learning/lesson-tracker";
-import { ApiResponse, Lesson, Module } from "@/types";
+import { ApiResponse, Lesson, Module, ModuleProgress } from "@/types";
 import { API_URL } from "@/lib/constants";
 
 interface Props {
@@ -31,7 +31,10 @@ async function getModule(moduleSlug: string, token: string): Promise<Module> {
   return result.data;
 }
 
-async function getLesson(lessonSlug: string, token: string): Promise<Lesson | undefined> {
+async function getLesson(
+  lessonSlug: string,
+  token: string,
+): Promise<Lesson | undefined> {
   const res = await fetch(`${API_URL}/lessons/${lessonSlug}`, {
     cache: "no-store",
     headers: authHeaders(token),
@@ -43,6 +46,21 @@ async function getLesson(lessonSlug: string, token: string): Promise<Lesson | un
   }
 
   const result: ApiResponse<Lesson> = await res.json();
+  return result.data;
+}
+
+async function getModuleProgress(
+  moduleId: string,
+  token: string,
+): Promise<ModuleProgress | null> {
+  const res = await fetch(`${API_URL}/progress/module/${moduleId}`, {
+    cache: "no-store",
+    headers: authHeaders(token),
+  });
+
+  if (!res.ok) return null;
+
+  const result: ApiResponse<ModuleProgress> = await res.json();
   return result.data;
 }
 
@@ -69,6 +87,8 @@ export default async function LessonPage({ params }: Props) {
     return <div>Gagal memuat data kursus. Silakan coba lagi.</div>;
   }
 
+  const moduleProgress = await getModuleProgress(moduleDetail.id, token);
+
   return (
     <>
       {/* Track lesson yang sedang dibuka, fire and forget */}
@@ -76,6 +96,7 @@ export default async function LessonPage({ params }: Props) {
       <LearningContainer
         learningPath={moduleDetail.learningPath}
         module={moduleDetail}
+        moduleProgress={moduleProgress}
         lesson={lesson}
         slug={slug}
         moduleSlug={moduleSlug}

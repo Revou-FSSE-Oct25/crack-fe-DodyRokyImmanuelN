@@ -7,6 +7,16 @@ export type AdminUser = {
   avatar: string | null;
   role: Role;
   createdAt: string;
+  enrollments: {
+    id: string;
+    status: 'ACTIVE' | 'COMPLETED';
+    enrolledAt: string;
+    learningPath: {
+      id: string;
+      title: string;
+      slug: string;
+    };
+  }[];
 };
 
 export type UsersMeta = {

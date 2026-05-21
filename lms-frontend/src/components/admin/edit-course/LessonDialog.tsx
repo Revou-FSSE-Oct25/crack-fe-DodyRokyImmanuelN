@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -42,6 +43,9 @@ export function LessonDialog({
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{dialog.mode === 'create' ? 'Tambah Lesson' : 'Edit Lesson'}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Form untuk {dialog.mode === 'create' ? 'menambahkan' : 'mengubah'} detail lesson.
+          </DialogDescription>
         </DialogHeader>
 
         {dialog.isLoadingLesson ? (

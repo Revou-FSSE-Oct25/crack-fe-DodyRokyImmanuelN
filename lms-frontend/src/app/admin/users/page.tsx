@@ -83,30 +83,32 @@ export default function AdminUsersPage() {
 
   const adminCount = users.filter((user) => user.role === 'ADMIN').length;
   const learnerCount = users.filter((user) => user.role === 'USER').length;
+  const enrolledUserCount = users.filter((user) => user.enrollments.length > 0).length;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Kelola Pengguna</h1>
+          <h1 className="text-2xl font-semibold">Daftar User</h1>
           <p className="text-sm text-muted-foreground">
-            Lihat akun pelajar dan admin yang terdaftar di platform.
+            Pantau akun admin dan pelajar yang terdaftar di platform.
           </p>
         </div>
-        <Badge variant="outline">{meta.total} total pengguna</Badge>
+        <Badge variant="outline">{meta.total} total user</Badge>
       </div>
 
       <UserStatsCards
         totalUsers={meta.total}
         adminCount={adminCount}
         learnerCount={learnerCount}
+        enrolledUserCount={enrolledUserCount}
       />
 
       <Card>
         <CardHeader className="gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle>Pengguna</CardTitle>
-            <CardDescription>Data diurutkan dari pengguna terbaru.</CardDescription>
+            <CardTitle>User</CardTitle>
+            <CardDescription>Data diurutkan dari user terbaru.</CardDescription>
           </div>
           <div className="relative w-full sm:max-w-xs">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

@@ -1,5 +1,6 @@
 import { Sidebar } from '@/components/shared/Sidebar';
 import { DashboardNavbar } from '@/components/shared/DashboardNavbar';
+import { AdminRouteGuard } from '@/components/auth/AdminRouteGuard';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,7 +13,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="max-w-7xl mx-auto w-full">
-            {children}
+            <AdminRouteGuard>{children}</AdminRouteGuard>
           </div>
         </main>
       </div>

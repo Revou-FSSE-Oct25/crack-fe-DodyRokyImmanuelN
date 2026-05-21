@@ -34,7 +34,7 @@ export function Sidebar() {
   },
   {
     href: '/admin/users',
-    label: 'Kelola Pengguna',
+    label: 'Daftar User',
     icon: Users,
     role: 'ADMIN'
   },

@@ -1,5 +1,5 @@
 // Server Component
-import { LearningPath, Module, Lesson } from "@/types";
+import { LearningPath, Module, Lesson, ModuleProgress } from "@/types";
 import LearningSidebar from "./learning-sidebar";
 import LessonContent from "./lesson-content";
 
@@ -8,16 +8,18 @@ type LearningPathContext = Pick<LearningPath, "id" | "title" | "slug">;
 interface Props {
   learningPath: LearningPathContext;
   module: Module;
+  moduleProgress: ModuleProgress | null;
   lesson: Lesson;
   slug: string;
   moduleSlug: string;
-  activeLessonSlug: string; 
+  activeLessonSlug: string;
   token: string;
 }
 
 export default function LearningContainer({
   learningPath,
   module,
+  moduleProgress,
   lesson,
   slug,
   moduleSlug,
@@ -29,7 +31,8 @@ export default function LearningContainer({
       <LearningSidebar
         learningPath={learningPath}
         module={module}
-        activeLessonSlug={activeLessonSlug} 
+        moduleProgress={moduleProgress}
+        activeLessonSlug={activeLessonSlug}
         slug={slug}
         moduleSlug={moduleSlug}
       />
@@ -39,7 +42,8 @@ export default function LearningContainer({
         <LessonContent
           lesson={lesson}
           module={module}
-          learningPath={learningPath} 
+          moduleProgress={moduleProgress}
+          learningPath={learningPath}
           slug={slug}
           moduleSlug={moduleSlug}
           token={token}

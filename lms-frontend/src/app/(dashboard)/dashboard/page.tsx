@@ -87,8 +87,8 @@ export default function DashboardPage() {
                   <Users className="h-5 w-5 text-purple-500" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium">Kelola Pengguna</p>
-                  <p className="text-sm text-muted-foreground">Lihat semua pengguna</p>
+                  <p className="font-medium">Daftar User</p>
+                  <p className="text-sm text-muted-foreground">Pantau akun dan enrollment</p>
                 </div>
                 <Button size="sm" variant="ghost" asChild>
                   <Link href="/admin/users">

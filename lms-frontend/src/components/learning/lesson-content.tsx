@@ -1,20 +1,22 @@
-"use client"; 
+"use client";
 
-import ReactMarkdown from "react-markdown";
-import { LearningPath, Module, Lesson } from "@/types";
-import LessonNavigation from "./lesson-navigation";
+import { LearningChatbot } from "@/components/learning-chatbot/LearningChatbot";
+import { API_URL } from "@/lib/constants";
+import { LearningPath, Lesson, Module, ModuleProgress } from "@/types";
+import { CheckCircle2, FileQuestion, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LearningChatbot } from "@/components/learning-chatbot/LearningChatbot";
 import { useState } from "react";
-import { API_URL } from "@/lib/constants";
+import ReactMarkdown from "react-markdown";
+import LessonNavigation from "./lesson-navigation";
 
 type LearningPathContext = Pick<LearningPath, "id" | "title" | "slug">;
 
 interface Props {
   lesson: Lesson;
   module: Module;
-  learningPath: LearningPathContext; 
+  moduleProgress: ModuleProgress | null;
+  learningPath: LearningPathContext;
   slug: string;
   moduleSlug: string;
   token: string;
@@ -44,18 +46,25 @@ function getYoutubeEmbedUrl(url: string) {
 export default function LessonContent({
   lesson,
   module,
-  learningPath, 
+  moduleProgress,
+  learningPath,
   slug,
   moduleSlug,
   token,
 }: Props) {
   const router = useRouter();
   const [isCompleting, setIsCompleting] = useState(false);
+  const lessonProgress = moduleProgress?.lessons.find(
+    (item) => item.id === lesson.id,
+  );
+  const [isCompleted, setIsCompleted] = useState(
+    lessonProgress?.progress === "COMPLETED",
+  );
   const videoUrl = lesson.readingContent?.videoUrl;
   const embedUrl = videoUrl ? getYoutubeEmbedUrl(videoUrl) : null;
 
   const handleCompleteLesson = async () => {
-    if (lesson.type !== "READING") return;
+    if (lesson.type !== "READING" || isCompleted) return;
 
     setIsCompleting(true);
     try {
@@ -70,9 +79,10 @@ export default function LessonContent({
       const result = await res.json();
 
       if (res.ok) {
+        setIsCompleted(true);
         if (result.data?.moduleCompleted) {
           alert("Selamat! Modul Selesai.");
-          router.push(`/learning/${slug}`); 
+          router.push(`/learning/${slug}`);
         } else {
           router.refresh();
         }
@@ -115,16 +125,52 @@ export default function LessonContent({
           </div>
 
           <div className="mt-8 rounded-lg border bg-muted/30 p-4">
-            <p className="mb-3 text-sm text-muted-foreground">
-              Setelah selesai membaca materi ini, tandai lesson sebagai selesai agar progres modulmu naik.
-            </p>
+            <div className="mb-4 flex items-start gap-3">
+              <div
+                className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                  isCompleted
+                    ? "bg-emerald-500 text-white"
+                    : "bg-primary/10 text-primary"
+                }`}
+              >
+                <CheckCircle2 className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">
+                  {isCompleted
+                    ? "Lesson ini sudah ditandai selesai"
+                    : "Tandai lesson setelah selesai membaca"}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {isCompleted
+                    ? "Status ini juga tampil di sidebar agar progres belajarmu mudah dipantau."
+                    : "Status lesson akan berubah di tombol dan sidebar setelah tersimpan."}
+                </p>
+              </div>
+            </div>
             <button
               type="button"
               onClick={handleCompleteLesson}
-              disabled={isCompleting}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+              disabled={isCompleting || isCompleted}
+              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed ${
+                isCompleted
+                  ? "bg-emerald-500 text-white shadow-sm"
+                  : "bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50"
+              }`}
             >
-              {isCompleting ? "Menyimpan..." : "Tandai Lesson Selesai"}
+              {isCompleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Menyimpan...
+                </>
+              ) : isCompleted ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4" />
+                  Lesson Selesai
+                </>
+              ) : (
+                "Tandai Lesson Selesai"
+              )}
             </button>
           </div>
         </div>
@@ -133,8 +179,8 @@ export default function LessonContent({
       {lesson.type === "QUIZ" && (
         <div className="mt-2 mb-8">
           <div className="rounded-xl border border-border bg-muted/50 p-8 flex flex-col items-center text-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
-              📝
+            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+              <FileQuestion className="h-7 w-7 text-primary" />
             </div>
             <div>
               <h2 className="text-lg font-semibold mb-1">Quiz</h2>
@@ -146,13 +192,12 @@ export default function LessonContent({
               href={`/learning/${slug}/module/${moduleSlug}/quiz/${lesson.slug}`}
               className="px-6 py-2.5 bg-primary text-white rounded-lg inline-block hover:opacity-90 transition font-medium"
             >
-              Mulai Quiz →
+              Mulai Quiz
             </Link>
           </div>
         </div>
       )}
 
-      {/* Sambungkan fungsi handler ke Navigasi */}
       <LessonNavigation
         lessons={module.lessons}
         currentLessonSlug={lesson.slug}

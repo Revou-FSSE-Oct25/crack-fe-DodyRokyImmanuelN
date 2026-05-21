@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -32,6 +33,9 @@ export function ModuleDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{dialog.mode === 'create' ? 'Tambah Modul' : 'Edit Modul'}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Form untuk {dialog.mode === 'create' ? 'menambahkan' : 'mengubah'} detail modul.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">

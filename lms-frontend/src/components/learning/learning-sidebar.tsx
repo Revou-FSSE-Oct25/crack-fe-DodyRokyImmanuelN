@@ -1,12 +1,20 @@
 import Link from "next/link";
-import { LearningPath, Module } from "@/types";
-import { PlayCircle, FileQuestion, BookOpen, ChevronLeft } from "lucide-react";
+import { LearningPath, Module, ModuleProgress } from "@/types";
+import {
+  PlayCircle,
+  FileQuestion,
+  BookOpen,
+  ChevronLeft,
+  CheckCircle2,
+  Circle,
+} from "lucide-react";
 
 type LearningPathContext = Pick<LearningPath, "id" | "title" | "slug">;
 
 interface Props {
   learningPath: LearningPathContext;
   module: Module;
+  moduleProgress: ModuleProgress | null;
   activeLessonSlug?: string;
   slug: string;
   moduleSlug: string;
@@ -15,13 +23,19 @@ interface Props {
 export default function LearningSidebar({
   learningPath,
   module,
+  moduleProgress,
   activeLessonSlug,
   slug,
   moduleSlug,
 }: Props) {
+  const progressByLessonId = new Map(
+    moduleProgress?.lessons.map((item) => [item.id, item]) ?? [],
+  );
+  const completedLessons = moduleProgress?.completedLessons ?? 0;
+  const totalLessons = moduleProgress?.totalLessons ?? module.lessons.length;
+
   return (
     <aside className="w-72 min-h-screen bg-sidebar text-sidebar-foreground flex flex-col border-r border-sidebar-border shrink-0">
-
       {/* Header */}
       <div className="p-4 border-b border-sidebar-border space-y-3">
         <Link
@@ -54,14 +68,22 @@ export default function LearningSidebar({
         </p>
         <p className="text-sm font-semibold">{module.title}</p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {module.lessons.length} pelajaran
+          {completedLessons} dari {totalLessons} pelajaran selesai
         </p>
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-sidebar-accent">
+          <div
+            className="h-full rounded-full bg-emerald-500 transition-all"
+            style={{ width: `${moduleProgress?.percentage ?? 0}%` }}
+          />
+        </div>
       </div>
 
       {/* Lesson list */}
       <div className="flex-1 overflow-y-auto py-2">
         {module.lessons.map((lesson, index) => {
           const isActive = lesson.slug === activeLessonSlug;
+          const lessonProgress = progressByLessonId.get(lesson.id);
+          const isCompleted = lessonProgress?.progress === "COMPLETED";
           const Icon = lesson.type === "QUIZ" ? FileQuestion : PlayCircle;
 
           return (
@@ -69,7 +91,11 @@ export default function LearningSidebar({
               key={lesson.id}
               href={`/learning/${slug}/module/${moduleSlug}/lesson/${lesson.slug}`}
               className={`group flex items-start gap-3 px-4 py-3 transition-colors relative ${
-                isActive ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/50"
+                isActive
+                  ? "bg-sidebar-accent"
+                  : isCompleted
+                    ? "hover:bg-emerald-500/10"
+                    : "hover:bg-sidebar-accent/50"
               }`}
             >
               {/* Active indicator strip */}
@@ -78,29 +104,54 @@ export default function LearningSidebar({
               )}
 
               {/* Number badge */}
-              <div className={`shrink-0 h-6 w-6 rounded-full flex items-center justify-center text-[11px] font-semibold mt-0.5 transition-colors ${
-                isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-sidebar-accent text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
-              }`}>
-                {index + 1}
+              <div
+                className={`shrink-0 h-6 w-6 rounded-full flex items-center justify-center text-[11px] font-semibold mt-0.5 transition-colors ${
+                  isCompleted
+                    ? "bg-emerald-500 text-white"
+                    : isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-sidebar-accent text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                }`}
+              >
+                {isCompleted ? (
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                ) : (
+                  index + 1
+                )}
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className={`text-sm leading-snug ${
-                  isActive
-                    ? "text-sidebar-accent-foreground font-semibold"
-                    : "text-sidebar-foreground"
-                }`}>
+                <p
+                  className={`text-sm leading-snug ${
+                    isActive
+                      ? "text-sidebar-accent-foreground font-semibold"
+                      : "text-sidebar-foreground"
+                  }`}
+                >
                   {lesson.title}
                 </p>
 
                 <div className="flex items-center gap-1.5 mt-1">
-                  <Icon className={`h-3 w-3 shrink-0 ${
-                    isActive ? "text-primary" : "text-muted-foreground"
-                  }`} />
+                  <Icon
+                    className={`h-3 w-3 shrink-0 ${
+                      isActive ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  />
                   <span className="text-[11px] text-muted-foreground">
                     {lesson.type === "QUIZ" ? "Kuis" : "Bacaan"}
+                  </span>
+                  <span className="text-muted-foreground">•</span>
+                  <span
+                    className={`inline-flex items-center gap-1 text-[11px] ${
+                      isCompleted ? "text-emerald-600" : "text-muted-foreground"
+                    }`}
+                  >
+                    {isCompleted ? (
+                      <CheckCircle2 className="h-3 w-3" />
+                    ) : (
+                      <Circle className="h-2.5 w-2.5" />
+                    )}
+                    {isCompleted ? "Selesai" : "Belum selesai"}
                   </span>
                 </div>
               </div>

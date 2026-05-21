@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -56,6 +57,9 @@ export function QuizDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>Kelola Quiz</DialogTitle>
+          <DialogDescription className="sr-only">
+            Form untuk mengatur quiz, pertanyaan, opsi jawaban, dan nilai kelulusan.
+          </DialogDescription>
         </DialogHeader>
 
         {dialog.isLoading ? (
