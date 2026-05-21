@@ -109,8 +109,18 @@ export default function CourseDetailPage() {
       <Card>
         <CardContent className="p-6">
           {/* Thumbnail */}
-          <div className="h-48 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg flex items-center justify-center mb-6">
-            <BookOpen className="h-16 w-16 text-primary/40" />
+          <div className="mb-6 h-48 overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 to-primary/5">
+            {course.thumbnail ? (
+              <img
+                src={course.thumbnail}
+                alt={course.title}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center">
+                <BookOpen className="h-16 w-16 text-primary/40" />
+              </div>
+            )}
           </div>
 
           <div className="flex items-start justify-between gap-4 flex-wrap">
